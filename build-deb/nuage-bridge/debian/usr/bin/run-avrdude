@@ -1,0 +1,55 @@
+#!/bin/sh
+
+# FIXME! Use avrdude to find out which MCU we are using and which baudrate is used for uploading!
+
+port=18
+
+# Modify inittab
+sed -i 's/^T0\:23/#-NUAGE-T0:23/g' /etc/inittab
+init Q
+
+# Reset
+test -d /sys/class/gpio/gpio${port} || echo "$port" > /sys/class/gpio/export
+echo "out" >  /sys/class/gpio/gpio${port}/direction
+echo "0"   >  /sys/class/gpio/gpio${port}/value
+/bin/sleep 0.25
+echo "1"   >  /sys/class/gpio/gpio${port}/value
+/bin/sleep 0.50
+echo "0"   >  /sys/class/gpio/gpio${port}/value
+
+# Install the sketch
+/usr/bin/avrdude -C/etc/avrdude.conf -v \
+	-patmega328p -carduino \
+	-P/dev/ttyAMA0 -b57600 \
+	-D -Uflash:w:/tmp/sketch.hex:i
+
+# Restore inittab
+sed -i 's/^\#-NUAGE-T0\:23/T0:23/g' /etc/inittab
+init Q
+
+# Reset again
+## /bin/sleep 2.50
+## echo "1"   >  /sys/class/gpio/gpio${port}/value
+## /bin/sleep 0.50
+## echo "0"   >  /sys/class/gpio/gpio${port}/value
+
+# Done!
+exit 0
+
+# Old code ATmega328P
+
+# /usr/local/bin/avrdude -c linuxgpio -C /usr/local/etc/avrdude.conf -p atmega328p -U lfuse:w:0xE2:m -U hfuse:w:0xDA:m -U efuse:w:0x05:m -Uflash:w:/tmp/sketch.hex:i
+
+# Old code!
+
+#echo 1 > /sys/class/gpio/gpio21/value
+#avrdude  -q -q -c linuxgpio -C /etc/avrdude.conf -p m32u4 -U efuse:r:/tmp/efuse:d
+#read EFUSE < /tmp/efuse
+#rm -f /tmp/efuse
+#if [ "x$EFUSE" = "x203" ] # 203 = 0xCB
+#then
+#	avrdude -c linuxgpio -C /etc/avrdude.conf -p m32u4 -U lfuse:w:0xFF:m -U hfuse:w:0xD8:m -U efuse:w:0xCB:m -Uflash:w:$1:i $2
+#else
+#	avrdude -c linuxgpio -C /etc/avrdude.conf -p m32u4 -U lfuse:w:0xFF:m -U hfuse:w:0xD8:m -U efuse:w:0xFB:m -Uflash:w:$1:i $2
+#fi
+#echo 0 > /sys/class/gpio/gpio21/value

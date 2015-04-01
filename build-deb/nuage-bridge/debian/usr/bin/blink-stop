@@ -1,0 +1,7 @@
+#!/bin/sh
+
+exit 0
+# FIXME: Do some real blinking when the pin of the LED is known!
+
+echo "none" > /sys/class/leds/ds:green:wlan/trigger
+

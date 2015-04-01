@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# add user 
+adduser --system --home /tmp --shell /bin/sh --disabled-password --gecos 'Bridge User,,,' nuage
+
+# link runlevel scripts
+# link bootloader - FIXME, should be done in init scripts 
+ln -sf /etc/arduino/ATmegaBOOT_168_atmega328_pro_8MHz.hex /etc/arduino/avr-default.hex
+
+# add line to /etc/inittab
+grep ttyAMA0 /etc/inittab | grep -v '^#' | while read line ; do
+    sed -i "\%${line}%d" /etc/inittab  
+done
+echo 'T0:23:respawn:/sbin/getty -L -a nuage ttyAMA0 19200' >> /etc/inittab 
+
+# change the boot parameter for serial line to avoid confusion
+sed -i 's/console=ttyAMA0,115200/console=ttyAMA0,19200/g' /boot/cmdline.txt 
+
+exit 0
+

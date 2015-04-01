@@ -1,0 +1,9 @@
+#!/bin/sh
+
+exit 0
+# FIXME: Do some real blinking when the pin of the LED is known!
+
+echo "timer" > /sys/class/leds/ds:green:wlan/trigger
+echo $1 > /sys/class/leds/ds:green:wlan/delay_on
+echo $1 > /sys/class/leds/ds:green:wlan/delay_off
+
