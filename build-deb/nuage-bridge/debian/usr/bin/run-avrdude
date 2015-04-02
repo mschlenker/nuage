@@ -4,19 +4,15 @@
 
 port=18
 
-# Modify inittab
+# Modify inittab - the getty for the terminal where the AVR side starts the bridge is
+# simply commented out. Init then has to be forced to re-read the inittab.
+
 sed -i 's/^T0\:23/#-NUAGE-T0:23/g' /etc/inittab
 init Q
 
-# Reset
-
-# test -d /sys/class/gpio/gpio${port} || echo "$port" > /sys/class/gpio/export
-#echo "out" >  /sys/class/gpio/gpio${port}/direction
-#echo "0"   >  /sys/class/gpio/gpio${port}/value
-#/bin/sleep 0.25
-#echo "1"   >  /sys/class/gpio/gpio${port}/value
-#/bin/sleep 0.50
-#echo "0"   >  /sys/class/gpio/gpio${port}/value
+# Reset - the autoreset wrapper catches the serial line reset and then pulls the
+# reset pin to high for a short moment. With the Pro Mini's and the Uno's bootloader
+# this is the only possibility to start avrdude in the right moment.
 
 # /usr/bin/avrdude-autoreset -patmega328p -carduino -P /dev/ttyAMA0 -v -U lfuse:r:-:i -b57600
 
@@ -30,6 +26,7 @@ init Q
         -D -Uflash:w:/tmp/sketch.hex:i
 
 # Restore inittab
+
 sed -i 's/^\#-NUAGE-T0\:23/T0:23/g' /etc/inittab
 init Q
 exit 0
