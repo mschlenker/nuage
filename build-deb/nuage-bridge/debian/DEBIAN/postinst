@@ -12,9 +12,8 @@ grep ttyAMA0 /etc/inittab | grep -v '^#' | while read line ; do
     sed -i "\%${line}%d" /etc/inittab  
 done
 echo 'T0:23:respawn:/sbin/getty -L -a nuage ttyAMA0 19200' >> /etc/inittab 
-
 # change the boot parameter for serial line to avoid confusion
 sed -i 's/console=ttyAMA0,115200/console=ttyAMA0,19200/g' /boot/cmdline.txt 
-
+init Q
 exit 0
 
