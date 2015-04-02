@@ -1,0 +1,4 @@
+#!/bin/sh
+
+sudo strace -o "|autoreset" -eioctl /usr/bin/avrdude $@
+
