@@ -28,14 +28,16 @@
 #
 # Copyright 2015 Mattias Schlenker (http://www.mattiasschlenker.de/)
 
-
 from flask import Flask, request, redirect, url_for, send_from_directory
 import time
 import sys
 sys.path.insert(0, '/usr/lib/python2.7/bridge/')
 from bridgeclient import BridgeClient as bridgeclient
 
-app = Flask(__name__, static_url_path='/static', static_folder='static')
+# Create a proper path:
+staticroot = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
+
+app = Flask(__name__, static_url_path='/static', static_folder=staticroot)
 brg = bridgeclient()
 
 @app.route('/')
@@ -44,7 +46,7 @@ def default_route():
 
 @app.route('/keystore_manager_example/<path:path>', methods=['GET'])
 def send_example(path):
-	return send_from_directory('static/keystore_manager_example', path)
+	return send_from_directory(staticroot + '/keystore_manager_example', path)
 
 @app.route('/data/get')
 def bridge_get_all():
@@ -68,5 +70,5 @@ def bridge_put(key, val):
         return msg, 200, {'Content-Type': 'application/json; charset=utf-8'}
 
 if __name__ == "__main__":
-        app.run(host='0.0.0.0',port='8088')
+        app.run(host='0.0.0.0',port='80')
 
