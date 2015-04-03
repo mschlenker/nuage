@@ -31,7 +31,7 @@
 import time
 import sys
 import os
-from flask import Flask, request, redirect, url_for, send_from_directory
+from flask import Flask, request, redirect, url_for, send_from_directory, send_static_file
 sys.path.insert(0, '/usr/lib/python2.7/bridge/')
 from bridgeclient import BridgeClient as bridgeclient
 
