@@ -43,12 +43,14 @@ brg = bridgeclient()
 
 @app.route('/')
 def default_route():
-    return "Hello World!"
+	return "Hello World!"
 
 @app.route('/keystore_manager_example/')
+def keystore_index()
 	return app.send_static_file(staticroot + '/keystore_manager_example/index.html')
 
 @app.route('/keystore_manager_example')
+def keystore_redirect()
 	return redirect(url_for('keystore_manager_example/'))
 
 @app.route('/keystore_manager_example/<path:path>', methods=['GET'])
