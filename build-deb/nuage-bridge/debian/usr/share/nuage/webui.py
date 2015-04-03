@@ -47,7 +47,7 @@ def default_route():
 
 @app.route('/keystore_manager_example/')
 def keystore_index():
-	return send_static_file(staticroot + '/keystore_manager_example/index.html')
+	return app.send_static_file('keystore_manager_example/index.html')
 
 @app.route('/keystore_manager_example')
 def keystore_redirect():
