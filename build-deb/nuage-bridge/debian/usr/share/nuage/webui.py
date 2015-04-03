@@ -31,7 +31,7 @@
 import time
 import sys
 import os
-from flask import Flask, request, redirect, url_for, send_from_directory, send_static_file
+from flask import Flask, request, redirect, url_for, send_from_directory
 sys.path.insert(0, '/usr/lib/python2.7/bridge/')
 from bridgeclient import BridgeClient as bridgeclient
 
@@ -47,7 +47,7 @@ def default_route():
 
 @app.route('/keystore_manager_example/')
 def keystore_index():
-	return app.send_static_file(staticroot + '/keystore_manager_example/index.html')
+	return send_static_file(staticroot + '/keystore_manager_example/index.html')
 
 @app.route('/keystore_manager_example')
 def keystore_redirect():
