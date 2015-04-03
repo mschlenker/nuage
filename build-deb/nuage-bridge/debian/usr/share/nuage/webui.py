@@ -28,9 +28,10 @@
 #
 # Copyright 2015 Mattias Schlenker (http://www.mattiasschlenker.de/)
 
-from flask import Flask, request, redirect, url_for, send_from_directory
 import time
 import sys
+import os
+from flask import Flask, request, redirect, url_for, send_from_directory
 sys.path.insert(0, '/usr/lib/python2.7/bridge/')
 from bridgeclient import BridgeClient as bridgeclient
 
