@@ -7,6 +7,7 @@ fi
 
 chown -R root:root build-deb
 chmod 0755 build-deb/nuage-bridge/debian/usr/bin/*
+chmod 0755 build-deb/nuage-bridge/debian/etc/init.d/*
 chmod 0755 build-deb/nuage-bridge/debian/DEBIAN/postinst
 # chmod 0755 build-deb/avrdude6/debian/usr/local/bin/avrdude
 # chmod 0755 build-deb/avrdude6/debian/DEBIAN/postinst
