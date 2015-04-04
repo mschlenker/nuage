@@ -8,9 +8,8 @@ case "$1" in
   start)
     echo "Starting server"
     /sbin/start-stop-daemon --start --pidfile $PIDFILE \
-        --user www-data --group www-data \
+        --user root --group root \
         -b --make-pidfile \
-        --chuid www-data \
         --exec $DAEMON $ARGS
     ;;
   stop)
