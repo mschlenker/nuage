@@ -71,6 +71,10 @@ def send_example(path):
 	return send_from_directory(staticroot + '/keystore_manager_example', path)
 
 @app.route('/data/get')
+def data_get_redirect():
+	return redirect(url_for('data/get/'))
+
+@app.route('/data/get/')
 def bridge_get_all():
         res = brg.getall()
         arr = []
@@ -83,6 +87,12 @@ def bridge_get_all():
 def bridge_get_bykey(key):
         res = brg.get(key)
         msg = '{"value":"' + res + '","key":"' + key + '","response":"get"}'
+        return msg, 200, {'Content-Type': 'application/json; charset=utf-8'}
+
+@app.route('/data/delete/<key>')
+def bridge_delete_bykey(key):
+        res = brg.delete(key)
+        msg = '{"value":"' + res + '","key":"' + key + '","response":"delete"}'
         return msg, 200, {'Content-Type': 'application/json; charset=utf-8'}
 
 @app.route('/data/put/<key>/<val>')
