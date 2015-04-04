@@ -4,8 +4,8 @@
 adduser --system --home /tmp --shell /bin/sh --disabled-password --gecos 'Bridge User,,,' nuage
 
 # link runlevel scripts
-# link bootloader - FIXME, should be done in init scripts 
-ln -sf /etc/arduino/ATmegaBOOT_168_atmega328_pro_8MHz.hex /etc/arduino/avr-default.hex
+# install config
+[ -f /etc/nuage/nuage.cfg ] || install -m 0644 /etc/nuage/nuage.cfg.dist /etc/nuage/nuage.cfg
 
 # add line to /etc/inittab
 grep ttyAMA0 /etc/inittab | grep -v '^#' | while read line ; do

@@ -28,15 +28,28 @@
 #
 # Copyright 2015 Mattias Schlenker (http://www.mattiasschlenker.de/)
 
+# Configuration file /etc/nuage/nuage.cfg
+# [RestAPI]
+# port=80
+# open=True
+#
+# [Bridge]
+# baudrate=19200
+# board=ProMini16
+# reset=18
+
 import time
 import sys
 import os
+import ConfigParser
 from flask import Flask, request, redirect, url_for, send_from_directory
 sys.path.insert(0, '/usr/lib/python2.7/bridge/')
 from bridgeclient import BridgeClient as bridgeclient
 
 # Create a proper path:
 staticroot = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
+parser = ConfigParser.ConfigParser()
+cfg = parser.read("/etc/nuage/nuage.cfg")
 
 app = Flask(__name__, static_url_path='/static', static_folder=staticroot)
 brg = bridgeclient()
@@ -79,5 +92,5 @@ def bridge_put(key, val):
         return msg, 200, {'Content-Type': 'application/json; charset=utf-8'}
 
 if __name__ == "__main__":
-        app.run(host='0.0.0.0',port='80')
+        app.run(host='0.0.0.0',port=cfg.getint("RestAPI", "port")
 
