@@ -92,5 +92,5 @@ def bridge_put(key, val):
         return msg, 200, {'Content-Type': 'application/json; charset=utf-8'}
 
 if __name__ == "__main__":
-        app.run(host='0.0.0.0',port=int(cfg.get("RestAPI", "port")))
+        app.run(host='0.0.0.0',port=int(parser.get("RestAPI", "port")))
 
