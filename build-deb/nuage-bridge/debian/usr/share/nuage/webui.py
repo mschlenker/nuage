@@ -80,9 +80,9 @@ def bridge_get_all():
                 arr.append('"' + k + '":"' + v + '"')
         msg = '{"value":{' + ','.join(arr) + '},"response":"get"}'
         return msg, 200, {'Content-Type': 'application/json; charset=utf-8'}
-	
+
 @app.route('/data/')
-def datax_redirect():
+def data_redirect():
 	return redirect(url_for('data/get/'))
 
 @app.route('/data/delete/<key>')
