@@ -70,6 +70,14 @@ def keystore_redirect():
 def send_example(path):
 	return send_from_directory(staticroot + '/keystore_manager_example', path)
 
+@app.route('/data')
+def data_redirect():
+	return redirect(url_for('data/'))
+
+@app.route('/data/')
+def datax_redirect():
+	return redirect(url_for('data/get/'))
+
 @app.route('/data/get')
 def data_get_redirect():
 	return redirect(url_for('data/get/'))
