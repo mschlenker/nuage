@@ -58,6 +58,10 @@ brg = bridgeclient()
 def default_route():
 	return "Hello World!"
 
+@app.route('/keystore_manager_example/<path:path>', methods=['GET'])
+def send_example(path):
+	return send_from_directory(staticroot + '/keystore_manager_example', path)
+
 @app.route('/keystore_manager_example/')
 def keystore_index():
 	return app.send_static_file('keystore_manager_example/index.html')
@@ -66,17 +70,11 @@ def keystore_index():
 def keystore_redirect():
 	return redirect(url_for('keystore_manager_example/'))
 
-@app.route('/keystore_manager_example/<path:path>', methods=['GET'])
-def send_example(path):
-	return send_from_directory(staticroot + '/keystore_manager_example', path)
-
-@app.route('/data')
-def data_redirect():
-	return redirect(url_for('data/'))
-
-@app.route('/data/')
-def datax_redirect():
-	return redirect(url_for('data/get'))
+@app.route('/data/get/<key>')
+def bridge_get_bykey(key):
+        res = brg.get(key)
+        msg = '{"value":"' + res + '","key":"' + key + '","response":"get"}'
+        return msg, 200, {'Content-Type': 'application/json; charset=utf-8'}
 
 @app.route('/data/get')
 def bridge_get_all():
@@ -86,12 +84,14 @@ def bridge_get_all():
                 arr.append('"' + k + '":"' + v + '"')
         msg = '{"value":{' + ','.join(arr) + '},"response":"get"}'
         return msg, 200, {'Content-Type': 'application/json; charset=utf-8'}
-
-@app.route('/data/get/<key>')
-def bridge_get_bykey(key):
-        res = brg.get(key)
-        msg = '{"value":"' + res + '","key":"' + key + '","response":"get"}'
-        return msg, 200, {'Content-Type': 'application/json; charset=utf-8'}
+	
+@app.route('/data/')
+def datax_redirect():
+	return redirect(url_for('data/get'))
+	
+@app.route('/data')
+def data_redirect():
+	return redirect(url_for('data/'))
 
 @app.route('/data/delete/<key>')
 def bridge_delete_bykey(key):
