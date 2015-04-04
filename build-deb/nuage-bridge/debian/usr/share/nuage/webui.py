@@ -42,8 +42,7 @@ import time
 import sys
 import os
 import ConfigParser
-import flask
-# from flask import Flask, request, redirect, url_for, send_from_directory
+from flask import Flask, request, redirect, url_for, send_from_directory
 sys.path.insert(0, '/usr/lib/python2.7/bridge/')
 from bridgeclient import BridgeClient as bridgeclient
 
@@ -67,6 +66,10 @@ def send_example(path):
 def keystore_index():
 	return app.send_static_file('keystore_manager_example/index.html')
 
+@app.route('/data/')
+def data_redirect():
+	return redirect(url_for('data/get'))
+
 @app.route('/data/get/<key>')
 def bridge_get_bykey(key):
         res = brg.get(key)
@@ -81,10 +84,6 @@ def bridge_get_all():
                 arr.append('"' + k + '":"' + v + '"')
         msg = '{"value":{' + ','.join(arr) + '},"response":"get"}'
         return msg, 200, {'Content-Type': 'application/json; charset=utf-8'}
-
-@app.route('/data/')
-def data_redirect():
-	return redirect(url_for('data/get'))
 
 @app.route('/data/delete/<key>')
 def bridge_delete_bykey(key):
