@@ -76,13 +76,9 @@ def data_redirect():
 
 @app.route('/data/')
 def datax_redirect():
-	return redirect(url_for('data/get/'))
+	return redirect(url_for('data/get'))
 
 @app.route('/data/get')
-def data_get_redirect():
-	return redirect(url_for('data/get/'))
-
-@app.route('/data/get/')
 def bridge_get_all():
         res = brg.getall()
         arr = []
