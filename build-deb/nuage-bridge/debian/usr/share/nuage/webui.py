@@ -83,7 +83,7 @@ def bridge_get_all():
 
 @app.route('/data/')
 def data_redirect():
-	return redirect(url_for('data/get/'))
+	return redirect(url_for('data/get'))
 
 @app.route('/data/delete/<key>')
 def bridge_delete_bykey(key):
