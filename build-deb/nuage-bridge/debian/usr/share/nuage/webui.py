@@ -66,17 +66,13 @@ def send_example(path):
 def keystore_index():
 	return app.send_static_file('keystore_manager_example/index.html')
 
-@app.route('/keystore_manager_example')
-def keystore_redirect():
-	return redirect(url_for('keystore_manager_example/'))
-
 @app.route('/data/get/<key>')
 def bridge_get_bykey(key):
         res = brg.get(key)
         msg = '{"value":"' + res + '","key":"' + key + '","response":"get"}'
         return msg, 200, {'Content-Type': 'application/json; charset=utf-8'}
 
-@app.route('/data/get')
+@app.route('/data/get/')
 def bridge_get_all():
         res = brg.getall()
         arr = []
@@ -87,11 +83,7 @@ def bridge_get_all():
 	
 @app.route('/data/')
 def datax_redirect():
-	return redirect(url_for('data/get'))
-	
-@app.route('/data')
-def data_redirect():
-	return redirect(url_for('data/'))
+	return redirect(url_for('data/get/'))
 
 @app.route('/data/delete/<key>')
 def bridge_delete_bykey(key):
