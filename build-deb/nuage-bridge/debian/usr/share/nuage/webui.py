@@ -95,7 +95,7 @@ def bridge_put(key, val):
 
 @app.route('/data/')
 def data_redirect():
-	return redirect(url_for('data/get'))
+	return redirect(url_for('bridge_get_all'))
 
 if __name__ == "__main__":
         app.run(host='0.0.0.0',port=int(parser.get("RestAPI", "port")))
