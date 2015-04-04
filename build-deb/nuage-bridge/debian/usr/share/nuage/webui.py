@@ -66,10 +66,6 @@ def send_example(path):
 def keystore_index():
 	return app.send_static_file('keystore_manager_example/index.html')
 
-@app.route('/data/')
-def data_redirect():
-	return redirect(url_for('data/get'))
-
 @app.route('/data/get/<key>')
 def bridge_get_bykey(key):
         res = brg.get(key)
@@ -96,6 +92,10 @@ def bridge_put(key, val):
         res = brg.put(key, val)
         msg = '{"value":"' + val + '","key":"' + key + '","response":"put"}'
         return msg, 200, {'Content-Type': 'application/json; charset=utf-8'}
+
+@app.route('/data/')
+def data_redirect():
+	return redirect(url_for('data/get'))
 
 if __name__ == "__main__":
         app.run(host='0.0.0.0',port=int(parser.get("RestAPI", "port")))
