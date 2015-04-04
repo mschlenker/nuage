@@ -1,0 +1,6 @@
+#!/bin/bash
+
+/etc/init.d/nuage stop
+update-rc.d -f nuage remove
+exit 0
+
