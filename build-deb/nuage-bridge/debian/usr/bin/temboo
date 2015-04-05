@@ -1,0 +1,382 @@
+#!/usr/bin/python
+
+###############################################################################
+#
+# temboo Arduino Yun API
+#
+# Copyright 2013, Temboo Inc.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+# http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+#
+###############################################################################
+
+import os
+import sys
+import subprocess
+import re
+import optparse
+
+ESCAPABLE = re.compile(r'[\\"\b\f\n\r\t]')
+ESCAPE = {'\\':'\\\\', '"':'\\"', '\b':'\\b', '\f':'\\f', '\n':'\\n', '\r':'\\r', '\t':'\\t' }
+
+VALID_NAME = re.compile(r'^[\w][\w\-.+@]*$')
+
+SETTINGS_ROOT="/tmp/temboo"
+
+class OPT:
+    ACCOUNT      = '-a'
+    CHOREO       = '-c'
+    CREDENTIAL   = '-e'
+    INPUT        = '-i'
+    OUTPUT       = '-o'
+    APPKEY_NAME  = '-u'
+    APPKEY_VALUE = '-p'
+    READ         = '-r'
+    WRITE        = '-w'
+    RESERVED     = '-s'
+
+class ERROR:
+    OK                  = (0,   '')
+    ACCOUNT_MISSING     = (201, '(' + OPT.ACCOUNT + ') missing Temboo account name')
+    ACCOUNT_INVALID     = (202, '(' + OPT.ACCOUNT + ') "%s" is not a valid Temboo account name')
+    CHOREO_MISSING      = (203, '(' + OPT.CHOREO + ') missing choreo ID.')
+    CHOREO_INVALID      = (204, '(' + OPT.CHOREO + ') "%s" is not a valid choreo ID.')
+    APPKEY_NAME_MISSING = (205, '(' + OPT.APPKEY_NAME + ') missing application key name.')
+    APPKEY_NAME_INVALID = (206, '(' + OPT.APPKEY_NAME + ') "%s" is not a valid application key name.')
+    APPKEY_MISSING      = (207, '(' + OPT.APPKEY_VALUE + ') missing application key value.')
+    INPUT_MISSING       = (208, '(' + OPT.INPUT + ') input name:value pair is missing.')
+    INPUT_INVALID       = (209, '(' + OPT.INPUT + ') input "%s" missing name:value delimiter (:).')
+    INPUT_INVALID_NAME  = (210, '(' + OPT.INPUT + ') input variable name "%s" is not valid.')
+    OUTPUT_MISSING      = (211, '(' + OPT.OUTPUT + ') output name:value:path triplet is missing.')
+    OUTPUT_INVALID      = (212, '(' + OPT.OUTPUT + ') output "%s" missing name:path:variable delimiter (:).')
+    OUTPUT_INVALID_NAME = (213, '(' + OPT.OUTPUT + ') output name "%s" is not valid.')
+    OUTPUT_INVALID_VAR  = (214, '(' + OPT.OUTPUT + ') output variable name "%s" is not valid.')
+    READ_FILE_MISSING   = (215, '(' + OPT.READ + ') read settings file name is missing.')
+    READ_FILE_INVALID   = (216, '(' + OPT.READ + ') settings file "%s" could not be read.')
+    WRITE_FILE_MISSING  = (217, '(' + OPT.WRITE + ') write settings file name is missing.')
+    WRITE_FILE_INVALID  = (218, '(' + OPT.WRITE + ') settings file "%s" could not be written.')
+    READ_AND_WRITE      = (219, '(' + OPT.READ + ' ' + OPT.WRITE + ') cannot specify both read and write in the same call.')
+    CREDENTIAL_MISSING  = (220, '(' + OPT.CREDENTIAL + ') the credential name is missing.')
+    CREDENTIAL_INVALID  = (221, '(' + OPT.CREDENTIAL + ') "%s" is not a valid credential name.')
+    RESERVED_MISSING    = (222, '(' + OPT.RESERVED + ') reserved value is missing.')
+    HTTP_ERROR          = (223, 'A non-success HTTP response code was received.')
+
+
+class TembooOptionParser(optparse.OptionParser):
+    ERRORS = {
+        OPT.ACCOUNT     :ERROR.ACCOUNT_MISSING,
+        OPT.CHOREO      :ERROR.CHOREO_MISSING,
+        OPT.CREDENTIAL  :ERROR.CREDENTIAL_MISSING,
+        OPT.INPUT       :ERROR.INPUT_MISSING,
+        OPT.OUTPUT      :ERROR.OUTPUT_MISSING,
+        OPT.APPKEY_VALUE:ERROR.APPKEY_MISSING,
+        OPT.READ        :ERROR.READ_FILE_MISSING,
+        OPT.RESERVED    :ERROR.RESERVED_MISSING,
+        OPT.APPKEY_NAME :ERROR.APPKEY_NAME_MISSING,
+        OPT.WRITE       :ERROR.WRITE_FILE_MISSING,
+    }
+
+    def error(self, msg):
+        if msg.endswith("option requires an argument"):
+            opt = msg.split(None, 1)[0]
+            if opt in TembooOptionParser.ERRORS:
+                err = TembooOptionParser.ERRORS[opt]
+                optparse.OptionParser.exit(self, err[0], 'Error: ' + err[1]+'\n')
+            else:
+                optparse.OptionParser.error(self, msg)
+        else:
+            optparse.OptionParser.error(self, msg)
+
+def parseInput(args):
+    global options
+    global unusedArgs
+
+    parser = TembooOptionParser(optparse.SUPPRESS_USAGE, version='1.0')
+    parser.add_option(OPT.ACCOUNT, metavar='name', dest='acctName', help='authenticate using this account name')
+    parser.add_option(OPT.CHOREO, metavar='/choreo/path/name', dest='choreoID', help='the ID of the choreo to run')
+    parser.add_option(OPT.CREDENTIAL, metavar='name', dest='credential', help='the name of a credential to use with this choreo')
+    parser.add_option(OPT.INPUT, metavar='name:value', dest='inputs', action='append', help='specify an input pair')
+    parser.add_option(OPT.OUTPUT, metavar='name:path:var', dest='outputs', action='append', help='specify an output filter triplet')
+    parser.add_option(OPT.APPKEY_VALUE, metavar='application key value', dest='appKey', help='authenticate using this application key value')
+    parser.add_option(OPT.READ, metavar='name', dest='readName', help = 'read default values from the named settings file.')
+    parser.add_option(OPT.RESERVED, metavar='<reserved>', dest='serverAddr', help='reserved')
+    parser.add_option(OPT.APPKEY_NAME, metavar='application key name', dest='appKeyName', help='authenticate using this application key name')
+    parser.add_option(OPT.WRITE, metavar='name', dest='writeName', help='write default values into the named settings file')
+
+    (options, unusedArgs) = parser.parse_args(args)
+
+def escape(s):
+    return ESCAPABLE.sub(lambda x : ESCAPE[x.group(0)], s)
+
+def dedupe(data):
+    data = data if data is not None else []
+    pairs = [i.split(':',1) for i in data]
+    deduped = dict(pairs).items()
+    return deduped
+
+def assembleInputs(inputs):
+    deduped = dedupe(inputs)
+    # Format input pairs as a JSON map.
+    # (Why not use python's json module?  It's not included in Linino)
+    val = ','.join([ '"%s":"%s"'%(i[0],escape(i[1])) for i in deduped])
+    return val
+
+def assembleOutputs(outputs):
+    deduped = dedupe(outputs)
+    triplets = [(i[0], i[1].rsplit(':', 1)) for i in deduped]
+    # Format output triplets as a JSON array of maps.
+    # (Why not use python's json module?  It's not included in Linino)
+    val = ','.join(['{"name":"%s","path":"%s","variable":"%s"}'%(i[0], escape(i[1][0]), i[1][1]) for i in triplets])
+    return val
+
+def assembleData(inputs, outputs, credential):
+    data = '{'
+    if inputs:
+        data += '"inputs":{' + inputs + '},'
+
+    if outputs:
+        data += '"outputs":[' + outputs + '],'
+
+    if credential:
+        data += '"preset":"' + credential + '"'
+
+    data += '}'
+
+    return data
+
+def callCurl(data):
+    if options.serverAddr is None:
+        serverAddr = 'https://'+options.acctName+'.temboolive.com'
+    else:
+        serverAddr = options.serverAddr
+
+    args = ('curl',
+            '-w', 'HTTP_CODE\n\x1F%{http_code}\n\x1E',
+            '-k',
+            '-S',
+            '-s',
+            '--basic',
+            '-u',options.appKeyName + ':' + options.appKey,
+            '--header','x-temboo-domain: /' + options.acctName + '/master',
+            '--header', 'Content-Type: text/plain',
+            '-X', 'POST',
+            '--data', data,
+            serverAddr + '/arcturus-web/api-1.0/ar' + options.choreoID + '?source_id=arduinoyunSDK')
+ 
+
+    pipe = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output, err = pipe.communicate()
+    returnCode = 0
+    if err:
+        returnCode = pipe.returncode
+        sys.stdout.write(str("Error\n\x1F" + err + ("\x1E" if err.endswith("\n") else "\n\x1E")))
+    elif output[-5] != '2':
+        returnCode = ERROR.HTTP_ERROR[0]
+    sys.stdout.write(str(output))
+    return returnCode
+
+def writeSettings():
+
+    #We allow arbitrary absolute paths.
+    #If the given file name isn't an absolute path,
+    #assume it is relative to SETTINGS_ROOT.
+    if os.path.isabs(options.writeName):
+        fileName = options.writeName
+    else:
+        fileName = os.path.join(SETTINGS_ROOT,options.writeName)
+   
+    settings = []
+    opts = {
+        '-a':options.acctName,
+        '-c':options.choreoID,
+        '-e':options.credential,
+        '-p':options.appKey,
+        '-s':options.serverAddr,
+        '-u':options.appKeyName,
+    }
+
+    for key in opts:
+        value = opts[key]
+        if value:
+            settings.append(key + value + '\n')
+    
+    opts = {
+        '-i':options.inputs,
+        '-o':options.outputs,
+    }
+    for key in opts:
+        values = opts[key]
+        if values:
+            for value in values:
+                settings.append(key + value + '\n')
+
+    try:
+        if not os.path.exists(SETTINGS_ROOT):
+            os.makedirs(SETTINGS_ROOT)
+
+        with open(fileName, 'w') as f:
+            f.writelines(settings)
+    except:
+        return False
+
+    return True
+        
+def readSettings():
+    #We allow arbitrary absolute paths.
+    #If the given file name isn't an absolute path,
+    #assume it is relative to SETTINGS_ROOT.
+    if os.path.isabs(options.readName):
+        fileName = options.readName
+    else:
+        fileName = os.path.join(SETTINGS_ROOT,options.readName)
+
+    settings = None
+    if os.path.exists(fileName):
+        try:
+            with open(fileName, 'r') as f:
+                settings = [s.strip() for s in f.readlines()]
+        except:
+            settings = None
+        
+    return settings
+
+def exitWithError(err, params=None):
+    errMsg = 'Error\n\x1F' + err[1] + '\n\x1E'
+    msg = errMsg%params if params else errMsg
+    sys.stdout.write(msg)
+    sys.stdout.write("HTTP_CODE\n\x1F000\n\x1E")
+    sys.exit(err[0])
+
+def crosscheckOptions(opts, value, error):
+    REQUIRED_OPTS = {
+        '-a':options.acctName,
+        '-c':options.choreoID,
+        '-p':options.appKey,
+        '-u':options.appKeyName,
+    }
+    for o in opts:
+        if value.startswith(o) and not REQUIRED_OPTS[o]:
+            exitWithError(error)
+
+def validateChoreoID():
+    if not options.choreoID:
+        exitWithError(ERROR.CHOREO_MISSING)
+
+    # Choreos can only live in folders, so
+    # all choreo IDs MUST have at least one /.
+    if not '/' in options.choreoID:
+        exitWithError(ERROR.CHOREO_INVALID, options.choreoID)
+
+    crosscheckOptions(('-a', '-u', '-p'), options.choreoID, ERROR.CHOREO_MISSING)
+
+
+def validateAccountName():
+    if not options.acctName:
+        exitWithError(ERROR.ACCOUNT_MISSING)
+
+    # Account names can't begin with '-', so this should catch
+    # all cases of a missing argument.
+    if not re.match(r'^\w[\w\-]*\w$', options.acctName):
+        exitWithError(ERROR.ACCOUNT_INVALID, options.acctName)
+
+def validateAppKeyName():
+    if not options.appKeyName:
+        exitWithError(ERROR.APPKEY_NAME_MISSING)
+    
+    if not VALID_NAME.match(options.appKeyName):
+        exitWithError(ERROR.APPKEY_NAME_INVALID, options.appKeyName)
+
+    crosscheckOptions(('-a', '-p', '-c'), options.appKeyName, ERROR.APPKEY_NAME_MISSING)
+
+def validateAppKey():
+    # We can't really make any assumptions about what
+    # characters can be in app key values, so the 
+    # only thing we can do is make sure it's not empty
+    if not options.appKey:
+        exitWithError(ERROR.APPKEY_MISSING)
+
+def validateCredential():
+    if options.credential:
+        if not VALID_NAME.match(options.credential): exitWithError(ERROR.CREDENTIAL_INVALID, options.credential)
+
+def validateInputs():
+    if options.inputs:
+        for i in options.inputs:
+            if ":" not in i: exitWithError(ERROR.INPUT_INVALID, i)
+            s = i.split(':')
+            if not VALID_NAME.match(s[0]): exitWithError(ERROR.INPUT_INVALID_NAME, s[0])
+
+def validateOutputs():
+    if options.outputs:
+        for i in options.outputs:
+            if i.count(":") < 2: exitWithError(ERROR.OUTPUT_INVALID, i)
+            s = i.split(':')
+            if not VALID_NAME.match(s[0]): exitWithError(ERROR.OUTPUT_INVALID_NAME, s[0])
+            if not VALID_NAME.match(s[-1]): exitWithError(ERROR.OUTPUT_INVALID_VAR, s[-1])
+
+
+if __name__ == '__main__':
+
+    parseInput(sys.argv[1:])
+
+    # specifying both read and write in the same invocation
+    # isn't currently allowed.
+    if options.writeName and options.readName:
+        exitWithError(ERROR.READ_AND_WRITE)
+
+    # If the user specifies -w, default values are read from 
+    # current command line options and saved in a file in SETTINGS_ROOT.
+    # The choreo is not actually executed.
+    # We currently only honor one -w option per invocation 
+    if options.writeName:
+        if not writeSettings(): exitWithError(ERROR.WRITE_FILE_INVALID, options.writeName)
+        sys.exit(ERROR.OK[0])
+
+    # If the user specifies -r, default values are read from
+    # a previously stored file in SETTINGS_ROOT if it exists.
+    # Any options given on the command line override 
+    # default values.  The choreo is executed.
+    # We currently only honor one -r option per invocation
+    if options.readName:
+        args = readSettings()
+        if args is None: exitWithError(ERROR.READ_FILE_INVALID, options.readName)
+        args.extend(sys.argv[1:])
+        parseInput(args)
+    
+    
+    # Do some validation of inputs.  Note that we
+    # can't accurately detect and report all possible 
+    # problems.  Some cases may return mysterious or 
+    # misleading error messages.
+    validateChoreoID()
+    validateAccountName()
+    validateAppKeyName()
+    validateAppKey()
+    validateCredential()
+    validateInputs()
+    validateOutputs()
+
+    # Assemble the data portion of the POST.
+    inputs = assembleInputs(options.inputs)
+    outputs = assembleOutputs(options.outputs)
+    credential = options.credential
+    data = assembleData(inputs, outputs, credential)
+
+    # Send the request off to Temboo and return
+    # the exit code curl gives us.
+    exitValue = callCurl(data)
+    sys.exit(exitValue)
+
+
+
+
