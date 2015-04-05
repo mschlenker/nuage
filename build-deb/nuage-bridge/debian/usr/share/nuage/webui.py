@@ -41,6 +41,7 @@
 import time
 import sys
 import os
+import socket
 import ConfigParser
 from flask import Flask, request, redirect, url_for, send_from_directory
 sys.path.insert(0, '/usr/lib/python2.7/bridge/')
@@ -96,6 +97,15 @@ def bridge_put(key, val):
 @app.route('/data/')
 def data_redirect():
 	return redirect(url_for('bridge_get_all'))
+	
+@app.route('/arduino/<path:path>')
+def arduino_rest():
+	sck = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sck.connect(('localhost', 5555))
+	sck.send(path)
+	data = sck.recv(1024)
+	sck.close()
+	return data, 200, {'Content-Type': 'text/plain; charset=utf-8'}
 
 if __name__ == "__main__":
         app.run(host='0.0.0.0',port=int(parser.get("RestAPI", "port")))
