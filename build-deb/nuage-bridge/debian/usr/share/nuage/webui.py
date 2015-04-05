@@ -99,7 +99,7 @@ def data_redirect():
 	return redirect(url_for('bridge_get_all'))
 	
 @app.route('/arduino/<path:path>')
-def arduino_rest():
+def arduino_rest(path):
 	sck = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sck.connect(('localhost', 5555))
 	sck.send(path)
