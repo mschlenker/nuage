@@ -5,4 +5,4 @@ open=True
 [Bridge]
 baudrate=19200
 board=ProMini16
-reset=18
+reset=12
