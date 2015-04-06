@@ -1,7 +1,15 @@
 #!/usr/bin/python
 
+# based on https://github.com/watterott/RPi-ShieldBridge/blob/master/docu/autoreset
+# extended to read the reset pin from a config file
+
 import RPi.GPIO as GPIO
 import sys, os, re, time, fcntl
+import ConfigParser
+
+parser = ConfigParser.ConfigParser()
+cfg = parser.read("/etc/nuage/nuage.cfg")
+rstpin = int(parser.get("Bridge", "reset"))
 
 fd = sys.stdin.fileno()
 fl = fcntl.fcntl(fd, fcntl.F_GETFL)
@@ -12,10 +20,10 @@ dtr = re.compile('.+TIOCM_DTR.+')
 start = time.time()
 
 def reset():
-  GPIO.setup(12, GPIO.OUT) # 12 = GPIO18
-  GPIO.output(12, GPIO.HIGH)
-  time.sleep(0.12)
-  GPIO.output(12, GPIO.LOW)
+  GPIO.setup(rstpin, GPIO.OUT) # 12 = GPIO18
+  GPIO.output(rstpin, GPIO.HIGH)
+  time.sleep(0.15)
+  GPIO.output(rstpin, GPIO.LOW)
 
 def process():
   while True:
