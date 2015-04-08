@@ -1,9 +1,9 @@
 Package: nuage-bridge
-Version: 20150405-1
+Version: 20150408-1
 Section: base
 Priority: optional
 Architecture: all
-Depends: bash, python2.7, avrdude, lua5.1, telnet, avahi-utils, strace, lsof
+Depends: bash, python2.7, avrdude, lua5.1, telnet, avahi-utils, strace, lsof, curl, wget
 Maintainer: Mattias Schlenker <ms@mattiasschlenker.de>
 Description: Arduinos Yun bridge and some glue scripts to make Raspberry Pi
  with an AVR attached to the GPIO pins behave like an Arduino Yún. The name
