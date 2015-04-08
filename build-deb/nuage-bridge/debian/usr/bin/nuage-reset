@@ -1,0 +1,15 @@
+#!/usr/bin/python
+ 
+import RPi.GPIO as GPIO
+import sys, os, re, time, fcntl
+import ConfigParser
+
+parser = ConfigParser.ConfigParser()
+cfg = parser.read("/etc/nuage/nuage.cfg")
+rstpin = int(parser.get("Bridge", "reset"))
+ 
+GPIO.setmode(GPIO.BOARD) 
+GPIO.setup(rstpin, GPIO.OUT) # 12 = GPIO18
+GPIO.output(rstpin, GPIO.HIGH)
+time.sleep(0.15)
+GPIO.output(rstpin, GPIO.LOW)

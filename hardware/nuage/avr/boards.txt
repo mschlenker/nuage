@@ -27,7 +27,7 @@ nuage328n.build.variant=arduino:standard
 
 ##### 
 
-nuage328u.name=Arduino UNO
+nuage328u.name=Arduino Uno
 nuage328u.upload.via_ssh=true
 
 nuage328u.upload.tool=arduino:avrdude
@@ -46,7 +46,7 @@ nuage328u.bootloader.lock_bits=0x0F
 nuage328u.bootloader.file=ATmegaBOOT_168_atmega328.hex
 
 nuage328u.build.mcu=atmega328p
-nuage328u.build.f_cpu=8000000L
+nuage328u.build.f_cpu=16000000L
 nuage328u.build.board=AVR_YUN
 nuage328u.build.core=arduino:arduino
 nuage328u.build.variant=arduino:standard
