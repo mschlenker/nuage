@@ -69,6 +69,7 @@ def reset():
 	GPIO.output(rstpin, GPIO.HIGH)
 	time.sleep(0.15)
 	GPIO.output(rstpin, GPIO.LOW)
+	GPIO.cleanup()
 	return app.send_static_file('reset.html')
 
 @app.route('/keystore_manager_example/<path:path>', methods=['GET'])
