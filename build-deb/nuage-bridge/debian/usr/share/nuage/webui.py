@@ -43,6 +43,7 @@ import sys
 import os
 import socket
 import ConfigParser
+import RPi.GPIO as GPIO
 from flask import Flask, request, redirect, url_for, send_from_directory
 sys.path.insert(0, '/usr/lib/python2.7/bridge/')
 from bridgeclient import BridgeClient as bridgeclient
@@ -58,6 +59,16 @@ brg = bridgeclient()
 @app.route('/')
 def default_route():
 	return app.send_static_file('start.html')
+
+@app.route("/reset/")
+def reset():
+	rstpin = int(parser.get("Bridge", "reset"))
+	GPIO.setmode(GPIO.BOARD) 
+	GPIO.setup(rstpin, GPIO.OUT) # 12 = GPIO18
+	GPIO.output(rstpin, GPIO.HIGH)
+	time.sleep(0.15)
+	GPIO.output(rstpin, GPIO.LOW)
+	return app.send_static_file('reset.html')
 
 @app.route('/keystore_manager_example/<path:path>', methods=['GET'])
 def send_example(path):
