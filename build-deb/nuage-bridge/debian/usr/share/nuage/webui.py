@@ -57,7 +57,7 @@ brg = bridgeclient()
 
 @app.route('/')
 def default_route():
-	return "Hello World!"
+	return app.send_static_file('start.html')
 
 @app.route('/keystore_manager_example/<path:path>', methods=['GET'])
 def send_example(path):
