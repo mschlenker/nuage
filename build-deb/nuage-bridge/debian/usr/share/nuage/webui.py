@@ -60,6 +60,7 @@ brg = bridgeclient()
 def default_route():
 	return app.send_static_file('start.html')
 
+# FIXME: Will not work due to missing privileges
 @app.route("/reset/")
 def reset():
 	rstpin = int(parser.get("Bridge", "reset"))
