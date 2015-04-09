@@ -3,10 +3,12 @@ body {
 }
 
 div.outerbox {
+	font-family: sans-serif;
 	max-width: 600px;
 	margin-left: auto;
 	margin-right: auto;
 	margin-top:20px;
 	margin-bottom: 20px;
 	padding: 10px;
+	background-color: white;
 }
