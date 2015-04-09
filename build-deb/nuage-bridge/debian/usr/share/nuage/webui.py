@@ -63,13 +63,7 @@ def default_route():
 # FIXME: Will not work due to missing privileges
 @app.route("/reset/")
 def reset():
-	rstpin = int(parser.get("Bridge", "reset"))
-	GPIO.setmode(GPIO.BOARD) 
-	GPIO.setup(rstpin, GPIO.OUT) # 12 = GPIO18
-	GPIO.output(rstpin, GPIO.HIGH)
-	time.sleep(0.15)
-	GPIO.output(rstpin, GPIO.LOW)
-	GPIO.cleanup()
+	subprocess.call(["/usr/bin/nuage-reset"])
 	return app.send_static_file('reset.html')
 
 @app.route('/keystore_manager_example/<path:path>', methods=['GET'])
