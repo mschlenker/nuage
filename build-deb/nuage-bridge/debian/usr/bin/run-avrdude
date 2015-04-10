@@ -13,7 +13,7 @@ init Q
 # check for serial override
 if [ -x /etc/nuage/serial.cfg ] ; then
 	. /etc/nuage/serial.cfg
-elif grep sun7i /proc/cpuinfo
+elif grep sun7i /proc/cpuinfo ; then
 	SERIALDEV=ttyS2
 else
 	SERIALDEV=ttyAMA0
