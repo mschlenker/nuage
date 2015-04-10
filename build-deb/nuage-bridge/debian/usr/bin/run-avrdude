@@ -10,6 +10,15 @@ port=18
 sed -i 's/^T0\:23/#-NUAGE-T0:23/g' /etc/inittab
 init Q
 
+# check for serial override
+if [ -x /etc/nuage/serial.cfg ] ; then
+	. /etc/nuage/serial.cfg
+elif grep sun7i /proc/cpuinfo
+	SERIALDEV=ttyS2
+else
+	SERIALDEV=ttyAMA0
+fi
+
 # Reset - the autoreset wrapper catches the serial line reset and then pulls the
 # reset pin to high for a short moment. With the Pro Mini's and the Uno's bootloader
 # this is the only possibility to start avrdude in the right moment.
@@ -18,12 +27,8 @@ init Q
 
 /usr/bin/avrdude-autoreset -C/etc/avrdude.conf -v \
         -patmega328p -carduino \
-        -P/dev/ttyAMA0 -b57600 \
-        -D -Uflash:w:/tmp/sketch.hex:i || \
-/usr/bin/avrdude-autoreset -C/etc/avrdude.conf -v \
-        -patmega328p -carduino \
-        -P/dev/ttyAMA0 -b115200 \
-        -D -Uflash:w:/tmp/sketch.hex:i
+        -P/dev/${SERIALDEV} -b57600 \
+        -D -Uflash:w:/tmp/sketch.hex:i  
 
 # Restore inittab
 
