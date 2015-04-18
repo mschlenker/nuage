@@ -1,7 +1,12 @@
 
-
+/*
+ * This sketch requires Paul Stoffregens modified version of the Bridge librariy!
+ * See http://cdprojekte.mattiasschlenker.de/nuage/ for downloads and
+ * https://github.com/PaulStoffregen/Bridge for git access!
+ */
 
 #define BRIDGE_BAUDRATE 19200
+
 #include <Bridge.h>
 #include <Console.h>
 
@@ -12,7 +17,7 @@ void setup() {
   delay(1000);              // wait for a second
   digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW
   delay(1000);              // wait for a second
-  Bridge.begin();
+  Bridge.begin(Serial, BRIDGE_BAUDRATE);
   Console.begin();
   delay(1000);
 }

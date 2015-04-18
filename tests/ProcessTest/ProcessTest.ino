@@ -1,3 +1,8 @@
+/*
+ * This sketch requires Paul Stoffregens modified version of the Bridge librariy!
+ * See http://cdprojekte.mattiasschlenker.de/nuage/ for downloads and
+ * https://github.com/PaulStoffregen/Bridge for git access!
+ */
 
 #define BRIDGE_BAUDRATE 19200
 
@@ -6,7 +11,7 @@
 
 void setup() {
   // Initialize Bridge
-  Bridge.begin();
+  Bridge.begin(Serial, BRIDGE_BAUDRATE);
 
   // Initialize Serial
   Console.begin();

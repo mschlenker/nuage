@@ -1,3 +1,8 @@
+/*
+ * This sketch requires Paul Stoffregens modified version of the Bridge librariy!
+ * See http://cdprojekte.mattiasschlenker.de/nuage/ for downloads and
+ * https://github.com/PaulStoffregen/Bridge for git access!
+ */
 
 #define BRIDGE_BAUDRATE 19200
 
@@ -9,7 +14,7 @@ void setup() {
   pinMode(13, OUTPUT);
   digitalWrite(13, LOW);
   // Initialize Bridge and Mailbox
-  Bridge.begin();
+  Bridge.begin(Serial, BRIDGE_BAUDRATE);
   Mailbox.begin();
   Console.begin();
   digitalWrite(13, HIGH);

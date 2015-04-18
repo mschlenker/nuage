@@ -1,3 +1,8 @@
+/*
+ * This sketch requires Paul Stoffregens modified version of the Bridge librariy!
+ * See http://cdprojekte.mattiasschlenker.de/nuage/ for downloads and
+ * https://github.com/PaulStoffregen/Bridge for git access!
+ */
 
 #define BRIDGE_BAUDRATE 19200
 #include <Bridge.h>
@@ -8,7 +13,7 @@ void setup() {
   delay(1000);           
   digitalWrite(13, LOW);  
   delay(1000);      
-  Bridge.begin();
+  Bridge.begin(Serial, BRIDGE_BAUDRATE);
   delay(1000);
   Bridge.put("hello","world"); 
 }
