@@ -1,10 +1,15 @@
-
 /*
- * This sketch requires Paul Stoffregens modified version of the Bridge librariy!
- * See http://cdprojekte.mattiasschlenker.de/nuage/ for downloads and
- * https://github.com/PaulStoffregen/Bridge for git access!
+ * This sketch requires the Arduino IDE (from arduino.cc) version 1.6.4 or later. 
+ * Alternatively Paul Stoffregens version of the Bridge library may be used with
+ * Arduino 1.5.x or later. See https://github.com/PaulStoffregen/Bridge for git
+ * access!
+ *
+ * If you want to tinker with Nuage in non standard setups use Pauls Bridge
+ * library, since it allows you to specify arbitary serial ports for use with the
+ * Bridge. 
  */
 
+// Define the baud rate to use - Arduino 1.6.4 or later
 #define BRIDGE_BAUDRATE 19200
 
 #include <Bridge.h>
@@ -17,7 +22,9 @@ void setup() {
   delay(1000);              // wait for a second
   digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW
   delay(1000);              // wait for a second
-  Bridge.begin(Serial, BRIDGE_BAUDRATE);
+  Bridge.begin();
+  // Alternative notation with Paul Stoffregens modified version of the Bridge
+  // Bridge.begin(Serial, BRIDGE_BAUDRATE);
   Console.begin();
   delay(1000);
 }
