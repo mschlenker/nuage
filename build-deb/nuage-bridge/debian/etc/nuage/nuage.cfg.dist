@@ -6,3 +6,6 @@ open=True
 baudrate=19200
 board=ProMini16
 reset=12
+
+[AVRdude]
+bootbaudrate=57600

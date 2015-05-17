@@ -1,8 +1,10 @@
 #!/bin/sh
 
-# FIXME! Use avrdude to find out which MCU we are using and which baudrate is used for uploading!
+# Read the boot baudrate from the config file
 
-port=18
+BAUDRATE=` grep bootbaudrate /etc/nuage/nuage.cfg | awk -F '=' '{print $2}' `
+[ -z "$BAUDRATE" ] && BAUDRATE=57600
+[ "$BAUDRATE" -lt 1200 ] && BAUDRATE=57600
 
 # Modify inittab - the getty for the terminal where the AVR side starts the bridge is
 # simply commented out. Init then has to be forced to re-read the inittab.
@@ -27,7 +29,7 @@ fi
 
 /usr/bin/avrdude-autoreset -C/etc/avrdude.conf -v \
         -patmega328p -carduino \
-        -P/dev/${SERIALDEV} -b57600 \
+        -P/dev/${SERIALDEV} -b${BAUDRATE} \
         -D -Uflash:w:/tmp/sketch.hex:i  
 
 # Restore inittab
