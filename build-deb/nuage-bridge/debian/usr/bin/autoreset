@@ -22,7 +22,7 @@ start = time.time()
 def reset():
   GPIO.setup(rstpin, GPIO.OUT) # 12 = GPIO18
   GPIO.output(rstpin, GPIO.HIGH)
-  time.sleep(0.10)
+  time.sleep(0.12)
   GPIO.output(rstpin, GPIO.LOW)
 
 def process():
