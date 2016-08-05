@@ -1,12 +1,12 @@
 /*
- * This sketch requires the Arduino IDE (from arduino.cc) version 1.6.4 or later. 
+ * This sketch requires the Arduino IDE (from arduino.cc) version 1.6.4 or later.
  * Alternatively Paul Stoffregens version of the Bridge library may be used with
  * Arduino 1.5.x or later. See https://github.com/PaulStoffregen/Bridge for git
  * access!
  *
  * If you want to tinker with Nuage in non standard setups use Pauls Bridge
  * library, since it allows you to specify arbitary serial ports for use with the
- * Bridge. 
+ * Bridge.
  */
 
 // Define the baud rate to use - Arduino 1.6.4 or later
