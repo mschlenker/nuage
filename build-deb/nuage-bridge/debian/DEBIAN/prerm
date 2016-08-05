@@ -1,6 +1,10 @@
 #!/bin/bash
 
-/etc/init.d/nuage stop
-update-rc.d -f nuage remove
+if [ -f /etc/inittab ] ; then
+	/etc/init.d/nuage stop
+	update-rc.d -f nuage remove
+else
+	systemctl stop nuage
+	systemctl disable nuage
+fi
 exit 0
-

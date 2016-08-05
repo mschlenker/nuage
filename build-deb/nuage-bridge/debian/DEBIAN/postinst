@@ -7,26 +7,45 @@ adduser --system --home /tmp --shell /bin/sh --disabled-password --gecos 'Bridge
 # install config
 [ -f /etc/nuage/nuage.cfg ] || install -m 0644 /etc/nuage/nuage.cfg.dist /etc/nuage/nuage.cfg
 
+revision=` cat /proc/cpuinfo | grep 'Revision' | awk '{print $3}' | sed 's/^1000//' `
+
 # check for serial override
 if [ -x /etc/nuage/serial.cfg ] ; then
 	. /etc/nuage/serial.cfg
 elif grep sun7i /proc/cpuinfo ; then
 	SERIALDEV=ttyS2
+elif [ "$revision" = a02082 -o "$revision" = a22082 ]
+	# Raspberry Pi with bluetooth uses ttyAMA0 for bluetooth
+	SERIALDEV=ttyS0
 else
+	# Raspberry Pi without bluetooth
 	SERIALDEV=ttyAMA0
 fi
 
-# install daemon
-update-rc.d -f nuage defaults
-/etc/init.d/nuage start
+if [ -f /etc/inittab ] ; then
+	# SysV init with inittab and runlevels
+	# install daemon 
+	update-rc.d -f nuage defaults
+	/etc/init.d/nuage start
 
-# add line to /etc/inittab
-grep $SERIALDEV /etc/inittab | grep -v '^#' | while read line ; do
-    sed -i "\%${line}%d" /etc/inittab  
-done
-echo 'T0:23:respawn:/sbin/getty -L -a nuage '${SERIALDEV}' 19200' >> /etc/inittab 
-# change the boot parameter for serial line to avoid confusion
-# this will just have an effect on RPi
-sed -i 's/console='${SERIALDEV}',115200/console='${SERIALDEV}',19200/g' /boot/cmdline.txt 
-init Q
+	# add line to /etc/inittab
+	grep $SERIALDEV /etc/inittab | grep -v '^#' | while read line ; do
+		sed -i "\%${line}%d" /etc/inittab  
+	done
+	echo 'T0:23:respawn:/sbin/getty -L -a nuage '${SERIALDEV}' 19200' >> /etc/inittab 
+	# change the boot parameter for serial line to avoid confusion
+	# this will just have an effect on RPi
+	init Q
+else
+	# Systemd 
+	systemctl enable nuage
+	systemctl start nuage
+	mkdir -p /etc/systemd/system/serial-getty@${SERIALDEV}.service.d
+	ln -sf /etc/nuage/autologin.conf /etc/systemd/system/serial-getty@${SERIALDEV}.service.d/autologin.conf
+fi
+
+if [ -f /boot/cmdline.txt ] ; then
+	sed -i 's/console='${SERIALDEV}',115200/console='${SERIALDEV}',19200/g' /boot/cmdline.txt 
+	sed -i 's/console=serial0,115200/console=serial0,19200/g' /boot/cmdline.txt 
+fi
 exit 0
