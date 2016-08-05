@@ -1,0 +1,11 @@
+[Unit]
+Description=Start nuage servers
+
+[Service]
+Type=oneshot
+ExecStart=/etc/init.d/nuage start
+ExecStop=/etc/init.d/nuage stop
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
