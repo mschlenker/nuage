@@ -14,7 +14,7 @@ if [ -x /etc/nuage/serial.cfg ] ; then
 	. /etc/nuage/serial.cfg
 elif grep sun7i /proc/cpuinfo ; then
 	SERIALDEV=ttyS2
-elif [ "$revision" = a02082 -o "$revision" = a22082 ]
+elif [ "$revision" = a02082 -o "$revision" = a22082 ] ; then
 	# Raspberry Pi with bluetooth uses ttyAMA0 for bluetooth
 	SERIALDEV=ttyS0
 else
