@@ -37,15 +37,15 @@ fi
 
 # /usr/bin/avrdude-autoreset -patmega328p -carduino -P /dev/ttyAMA0 -v -U lfuse:r:-:i -b57600
 
-if grep '^board=Teensy30' /etc/nuage.cfg ; then
+if grep '^board=Teensy30' /etc/nuage/nuage.cfg ; then
 	/usr/local/bin/teensy_loader_cli -s -mmcu=mk20dx128 /tmp/sketch.hex
-elif  grep -e '^board=Teensy3[1,2]' /etc/nuage.cfg  ; then
+elif  grep -e '^board=Teensy3[1,2]' /etc/nuage/nuage.cfg  ; then
 	/usr/local/bin/teensy_loader_cli -s -mmcu=mk20dx256 /tmp/sketch.hex
-elif  grep '^board=Teensy35' /etc/nuage.cfg  ; then
+elif  grep '^board=Teensy35' /etc/nuage/nuage.cfg  ; then
 	/usr/local/bin/teensy_loader_cli -s -mmcu=mk64fx512 /tmp/sketch.hex
-elif  grep '^board=Teensy36' /etc/nuage.cfg  ; then
+elif  grep '^board=Teensy36' /etc/nuage/nuage.cfg  ; then
 	/usr/local/bin/teensy_loader_cli -s -mmcu=mk66fx1m0 /tmp/sketch.hex
-elif  grep '^board=TeensyLC' /etc/nuage.cfg  ; then
+elif  grep '^board=TeensyLC' /etc/nuage/nuage.cfg  ; then
 	/usr/local/bin/teensy_loader_cli -s -mmcu=mkl26z64 /tmp/sketch.hex
 else
 	/usr/bin/avrdude-autoreset -C/etc/avrdude.conf -v \
