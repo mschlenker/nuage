@@ -6,6 +6,10 @@ PIDFILE="/var/run/nuage.pid"
 
 case "$1" in
   start)
+    BAUDRATE=` grep '^baudrate' /etc/nuage/nuage.cfg | awk -F '=' '{print $2}' `
+    [ -z "$BAUDRATE" ] && BAUDRATE=19200
+    [ "$BAUDRATE" -lt 1200 ] && BAUDRATE=19200
+    /bin/stty -F /dev/serial0 $BAUDRATE 
     echo "Starting server"
     /sbin/start-stop-daemon --start --pidfile $PIDFILE \
         --user root --group root \
