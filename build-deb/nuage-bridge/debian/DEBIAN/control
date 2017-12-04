@@ -3,7 +3,7 @@ Version: 20160805-4
 Section: base
 Priority: optional
 Architecture: all
-Depends: bash, python2.7, avrdude, lua5.1, telnet, avahi-utils, strace, lsof, curl, wget, python-flask
+Depends: bash, python2.7, avrdude, lua5.1, telnet, avahi-utils, strace, lsof, curl, wget, python-flask, ash
 Maintainer: Mattias Schlenker <ms@mattiasschlenker.de>
 Description: Arduinos Yun bridge and some glue scripts to make Raspberry Pi
  with an AVR attached to the GPIO pins behave like an Arduino Yún. The name
