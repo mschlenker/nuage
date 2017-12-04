@@ -47,6 +47,11 @@ elif  grep '^board=Teensy36' /etc/nuage/nuage.cfg  ; then
 	/usr/local/bin/teensy_loader_cli -s -mmcu=mk66fx1m0 /tmp/sketch.hex
 elif  grep '^board=TeensyLC' /etc/nuage/nuage.cfg  ; then
 	/usr/local/bin/teensy_loader_cli -s -mmcu=mkl26z64 /tmp/sketch.hex
+elif  grep '^board=m1280' /etc/nuage/nuage.cfg  ; then
+	/usr/bin/avrdude-autoreset -C/etc/avrdude.conf -v \
+		-pm1280 -carduino \
+		-P/dev/${SERIALDEV} -b${BAUDRATE} \
+		-D -Uflash:w:/tmp/sketch.hex:i  	
 else
 	/usr/bin/avrdude-autoreset -C/etc/avrdude.conf -v \
 		-patmega328p -carduino \
